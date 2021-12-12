@@ -8,10 +8,10 @@ import VideoPlayerModal from 'src/components/VideoPlayerModal';
 import { PlayCircleFilled } from '@ant-design/icons';
 import { checkAndSignAuthMessage, getSignedToken } from 'src/helpers/lit';
 
-import AlbumPageStyle from './style';
+import LibraryPageStyle from './style';
 import { Video } from 'src/interfaces/kv';
 
-const AlbumPage: React.FC = () => {
+const LibraryPage: React.FC = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedVideoId, setSelectedVideoId] = useState<string>('');
@@ -58,10 +58,10 @@ const AlbumPage: React.FC = () => {
   }, []);
 
   return (
-    <AlbumPageStyle>
+    <LibraryPageStyle>
       <PageLayout>
         <div className='header'>
-          <Title level={2}>Video Album</Title>
+          <Title level={2}>Video Library</Title>
         </div>
 
         <VideoPlayerModal
@@ -107,8 +107,8 @@ const AlbumPage: React.FC = () => {
           })}
         </div>
       </PageLayout>
-    </AlbumPageStyle>
+    </LibraryPageStyle>
   );
 };
 
-export default AlbumPage;
+export default LibraryPage;

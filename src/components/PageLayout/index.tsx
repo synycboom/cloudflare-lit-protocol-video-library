@@ -19,10 +19,10 @@ const PageLayout: React.FC<{ showConnectWallet?: boolean }> = ({
               Cloudflare + Lit Protocol
             </span>
           }
-          subTitle='Video Album'
+          subTitle='Video Library'
           extra={[
             <Button type='link' key='1' onClick={() => history.push('/')}>
-              Album
+              Library
             </Button>,
             <Button type='link' key='2' onClick={() => history.push('/upload')}>
               Upload

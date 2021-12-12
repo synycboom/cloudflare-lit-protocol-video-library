@@ -1,6 +1,6 @@
 import { Switch, Route } from 'react-router-dom';
 import UploadPage from 'src/pages/UploadPage';
-import AlbumPage from 'src/pages/AlbumPage';
+import LibraryPage from 'src/pages/LibraryPage';
 
 import 'antd/dist/antd.less';
 import './App.css';
@@ -9,7 +9,7 @@ const App: React.FC = () => {
   return (
     <Switch>
       <Route path='/upload' component={UploadPage} />
-      <Route path='/' component={AlbumPage} />
+      <Route path='/' component={LibraryPage} />
     </Switch>
   );
 };

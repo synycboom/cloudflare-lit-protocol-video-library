@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const AlbumPageStyle = styled.div`
+const LibraryPageStyle = styled.div`
   .header {
     text-align: center;
     margin-bottom: 24px;
@@ -35,4 +35,4 @@ const AlbumPageStyle = styled.div`
     justify-content: center;
   }
 `;
-export default AlbumPageStyle;
+export default LibraryPageStyle;
