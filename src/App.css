@@ -1,0 +1,17 @@
+body {
+  font-family: monospace;
+  letter-spacing: -0.5px;
+
+  background-color: white;
+}
+
+p {
+  margin-bottom: 0px;
+}
+
+.ant-select-selector,
+.ant-input,
+.ant-message-notice-content,
+.ant-tag {
+  border-radius: 8px !important;
+}
