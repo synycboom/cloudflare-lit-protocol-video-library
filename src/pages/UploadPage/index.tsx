@@ -1,8 +1,8 @@
-import LitJsSdk from 'lit-js-sdk';
 import Title from 'antd/lib/typography/Title';
 import PageLayout from 'src/components/PageLayout';
 import Button from 'src/components/Button';
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import Steps from 'antd/lib/steps';
 import { ShareModal } from 'lit-access-control-conditions-modal';
 import { useWeb3React } from '@web3-react/core';
@@ -11,12 +11,11 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { Upload, message } from 'antd';
 import { getOneTimeUpload, uploadFile } from 'src/apis/upload';
 import { addVideo } from 'src/apis/kv';
+import { getVideoInfo } from 'src/apis/video';
 import { AccessControlCondition } from 'src/interfaces/accessControl';
+import { checkAndSignAuthMessage, saveSigningCondition } from 'src/helpers/lit';
 
 const { Step } = Steps;
-const litNodeClient = new LitJsSdk.LitNodeClient();
-
-litNodeClient.connect();
 
 const getChainIdFromAccessControls = (
   accessControls: AccessControlCondition[] | null
@@ -30,6 +29,7 @@ const getChainIdFromAccessControls = (
 };
 
 const UploadPage: React.FC = () => {
+  const history = useHistory();
   const [isACLModalVisible, setACLModalVisible] = useState(false);
   const [accessControlConditions, setAccessControlConditions] = useState<
     AccessControlCondition[] | null
@@ -44,7 +44,7 @@ const UploadPage: React.FC = () => {
   };
 
   const signAuthSig = async () => {
-    const sig = await LitJsSdk.checkAndSignAuthMessage({
+    const sig = await checkAndSignAuthMessage({
       chain: getChainIdFromAccessControls(accessControlConditions),
     });
 
@@ -87,30 +87,42 @@ const UploadPage: React.FC = () => {
       const otu = await getOneTimeUpload();
       if (!otu.success) {
         message.error(otu.errors[0].message);
-        setIsUploading(false);
 
         return false;
       }
 
       await uploadFile(otu.result.uploadURL, file);
 
+      const info = await getVideoInfo(otu.result.uid);
+      if (!info.success) {
+        message.error(info.errors[0].message);
+
+        return false;
+      }
+
       const resourceId = {
         baseUrl: '',
         path: '',
         orgId: '',
         role: '',
-        extraData: JSON.stringify({ videoId: otu.result.uid }),
+        extraData: JSON.stringify({
+          videoId: otu.result.uid,
+          name: info.result.meta.name,
+        }),
       };
 
       const chain = getChainIdFromAccessControls(accessControlConditions);
-      await litNodeClient.saveSigningCondition({
+      await saveSigningCondition({
         accessControlConditions,
         chain,
         authSig,
         resourceId,
       });
+
       await addVideo(otu.result.uid, accessControlConditions, resourceId);
+
       message.success('the video has been uploaded');
+      history.push('/');
     } catch (err) {
       message.error('cannot upload the video');
       console.error(err);

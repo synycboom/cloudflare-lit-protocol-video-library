@@ -17,5 +17,22 @@ const AlbumPageStyle = styled.div`
   .ant-table-thead .ant-table-cell {
     font-weight: bold;
   }
+
+  .video-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .video-content {
+    margin: 10px;
+  }
+
+  .card-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 export default AlbumPageStyle;

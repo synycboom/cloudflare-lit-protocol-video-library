@@ -3,7 +3,7 @@ import setting from 'src/setting';
 import { OneTimeUpload } from 'src/interfaces/upload';
 
 export const getOneTimeUpload = async () => {
-  const url = `${setting.API_URL}/videos/one-time-upload`;
+  const url = `${setting.API_URL}/upload/one-time-upload`;
   const response = await axios.get<OneTimeUpload>(url);
 
   return response.data;
