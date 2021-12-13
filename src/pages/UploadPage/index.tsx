@@ -56,7 +56,7 @@ const UploadPage: React.FC = () => {
     try {
       await signAuthSig();
     } catch (err: any) {
-      message.error(err);
+      message.error(err.message);
     }
 
     next();
