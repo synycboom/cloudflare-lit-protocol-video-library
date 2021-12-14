@@ -1,10 +1,17 @@
 import axios from 'axios';
 import setting from 'src/setting';
 import { OneTimeUpload } from 'src/interfaces/upload';
+import { Authentication } from 'src/interfaces/authentication';
+import { getAuthenticationHeader } from 'src/apis/util';
 
-export const getOneTimeUpload = async () => {
-  const url = `${setting.API_URL}/upload/one-time-upload`;
-  const response = await axios.get<OneTimeUpload>(url);
+export const getOneTimeUpload = async (auth: Authentication) => {
+  const url = `${setting.API_URL}/upload/link`;
+  const headers = getAuthenticationHeader(auth);
+  const response = await axios.get<OneTimeUpload>(url, {
+    headers: {
+      ...headers,
+    },
+  });
 
   return response.data;
 };

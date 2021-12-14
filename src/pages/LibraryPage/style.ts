@@ -5,6 +5,7 @@ const LibraryPageStyle = styled.div`
     text-align: center;
     margin-bottom: 24px;
   }
+
   .connect-wallet-container {
     display: flex;
     padding-bottom: 16px;
@@ -33,6 +34,10 @@ const LibraryPageStyle = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .ant-empty {
+    margin-top: 200px;
   }
 `;
 export default LibraryPageStyle;

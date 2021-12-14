@@ -4,6 +4,10 @@ import { getPresignedURL } from 'src/apis/video';
 import { Stream } from '@cloudflare/stream-react';
 import { LoadingOutlined } from '@ant-design/icons';
 import VideoPlayerModalStyle from './style';
+import { getAuthentication } from 'src/helpers';
+import { useRecoilState } from 'recoil';
+import { profileState } from 'src/state/profile';
+import { message } from 'antd';
 
 type Props = {
   jwt: string;
@@ -20,6 +24,7 @@ type VideoState = {
 };
 
 const VideoPlayerModal = (props: Props) => {
+  const [profile] = useRecoilState(profileState);
   const [videoState, setVideoState] = useState<VideoState>({
     loading: false,
     error: '',
@@ -35,7 +40,13 @@ const VideoPlayerModal = (props: Props) => {
     }));
 
     try {
-      const res = await getPresignedURL(props.jwt);
+      const auth = getAuthentication(profile);
+      if (!auth) {
+        message.error('Please login');
+        return;
+      }
+
+      const res = await getPresignedURL(props.jwt, auth);
       if (!res.success) {
         setVideoState((prevState) => ({
           ...prevState,

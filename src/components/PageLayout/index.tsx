@@ -16,10 +16,9 @@ const PageLayout: React.FC<{ showConnectWallet?: boolean }> = ({
         <PageHeader
           title={
             <span className='app-name' onClick={() => history.push('/')}>
-              Cloudflare + Lit Protocol
+              Lit Protocol x Cloudflare worker/stream
             </span>
           }
-          subTitle='Video Library'
           extra={[
             <Button type='link' key='1' onClick={() => history.push('/')}>
               Library

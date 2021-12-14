@@ -12,6 +12,7 @@ export type Video = {
   accessControlConditions: AccessControlCondition[];
   resourceId: ResourceId;
   videoId: string;
+  wallet: string;
 };
 
 export type KVVideoResponse = {

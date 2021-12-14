@@ -1,22 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Card, Col } from 'antd';
 import Title from 'antd/lib/typography/Title';
+import AntdButton from 'antd/lib/button';
 import { message } from 'antd';
+import { Empty } from 'antd';
 import PageLayout from 'src/components/PageLayout';
 import { listVideos } from 'src/apis/kv';
-import VideoPlayerModal from 'src/components/VideoPlayerModal';
 import { PlayCircleFilled } from '@ant-design/icons';
 import { checkAndSignAuthMessage, getSignedToken } from 'src/helpers/lit';
+import { getAuthentication } from 'src/helpers';
+import { useRecoilState } from 'recoil';
+import { profileState } from 'src/state/profile';
 
+import VideoPlayerModal from 'src/components/VideoPlayerModal';
 import LibraryPageStyle from './style';
 import { Video } from 'src/interfaces/kv';
+import { Authentication } from 'src/interfaces/authentication';
+import Disconnected from 'src/components/Disconnected';
 
 const LibraryPage: React.FC = () => {
+  const [profile] = useRecoilState(profileState);
   const [videos, setVideos] = useState<Video[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedVideoId, setSelectedVideoId] = useState<string>('');
   const [selectedVideoName, setSelectedVideoName] = useState<string>('');
   const [selectedJwt, setSelectedJwt] = useState<string>('');
+  const [auth, setAuth] = useState<Authentication | null>(null);
+
+  const { Meta } = Card;
 
   const fetchVideos = async () => {
     try {
@@ -57,6 +68,13 @@ const LibraryPage: React.FC = () => {
     fetchVideos();
   }, []);
 
+  useEffect(() => {
+    const data = getAuthentication(profile);
+    if (data) {
+      setAuth(data);
+    }
+  }, [profile]);
+
   return (
     <LibraryPageStyle>
       <PageLayout>
@@ -72,40 +90,56 @@ const LibraryPage: React.FC = () => {
           onClose={closeVideoModal}
         />
 
-        <div className='video-container'>
-          {videos.map((video, idx) => {
-            const extra = JSON.parse(video.resourceId.extraData);
-            const style =
-              videos.length - 1 === idx ? { marginRight: 'auto' } : {};
+        {(() => {
+          if (auth === null) {
+            return <Disconnected />;
+          }
 
+          if (videos.length) {
             return (
-              <Col
-                key={video.videoId}
-                className='video-content'
-                xs={16}
-                sm={16}
-                md={10}
-                lg={10}
-                xl={10}
-              >
-                <Card
-                  key={video.videoId}
-                  title={extra.name}
-                  // TODO: Implement delete
-                  // extra={<a href='#'>More</a>}
-                  style={style}
-                >
-                  <div className='card-content'>
-                    <PlayCircleFilled
-                      onClick={() => watch(video)}
-                      style={{ fontSize: '150px', cursor: 'pointer' }}
-                    />
-                  </div>
-                </Card>
-              </Col>
+              <div className='video-container'>
+                {videos.map((video, idx) => {
+                  const extra = JSON.parse(video.resourceId.extraData);
+                  const style =
+                    videos.length - 1 === idx ? { marginRight: 'auto' } : {};
+
+                  return (
+                    <Col
+                      key={video.videoId}
+                      className='video-content'
+                      xs={16}
+                      sm={16}
+                      md={10}
+                      lg={10}
+                      xl={10}
+                    >
+                      <Card
+                        key={video.videoId}
+                        style={style}
+                        actions={[
+                          <AntdButton
+                            type='primary'
+                            onClick={() => watch(video)}
+                            icon={<PlayCircleFilled />}
+                          >
+                            View
+                          </AntdButton>,
+                        ]}
+                      >
+                        <Meta
+                          title={`${extra.name}`}
+                          description={`Uploaded by: ${video.wallet}`}
+                        />
+                      </Card>
+                    </Col>
+                  );
+                })}
+              </div>
             );
-          })}
-        </div>
+          }
+
+          return <Empty />;
+        })()}
       </PageLayout>
     </LibraryPageStyle>
   );

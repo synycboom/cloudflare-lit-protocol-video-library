@@ -12,8 +12,14 @@ import { Upload, message } from 'antd';
 import { getOneTimeUpload, uploadFile } from 'src/apis/upload';
 import { addVideo } from 'src/apis/kv';
 import { getVideoInfo } from 'src/apis/video';
+import { useRecoilState } from 'recoil';
+import { profileState } from 'src/state/profile';
 import { AccessControlCondition } from 'src/interfaces/accessControl';
 import { checkAndSignAuthMessage, saveSigningCondition } from 'src/helpers/lit';
+import { getAuthentication } from 'src/helpers';
+import { Authentication } from 'src/interfaces/authentication';
+import Disconnected from 'src/components/Disconnected';
+import { getBadRequestMessage } from 'src/helpers/api';
 
 const { Step } = Steps;
 
@@ -34,13 +40,18 @@ const UploadPage: React.FC = () => {
   const [accessControlConditions, setAccessControlConditions] = useState<
     AccessControlCondition[] | null
   >(null);
+  const [profile] = useRecoilState(profileState);
   const [authSig, setAuthSig] = useState(null);
   const [step, setStep] = useState(0);
-
+  const [auth, setAuth] = useState<Authentication | null>(null);
   const { deactivate } = useWeb3React();
 
   const next = () => {
     setStep(step + 1);
+  };
+
+  const back = () => {
+    setStep(step - 1);
   };
 
   const signAuthSig = async () => {
@@ -53,10 +64,12 @@ const UploadPage: React.FC = () => {
 
   const aclSettingComplete = async () => {
     setACLModalVisible(false);
+
     try {
       await signAuthSig();
     } catch (err: any) {
       message.error(err.message);
+      return;
     }
 
     next();
@@ -74,6 +87,13 @@ const UploadPage: React.FC = () => {
     clear();
   }, []);
 
+  useEffect(() => {
+    const data = getAuthentication(profile);
+    if (data) {
+      setAuth(data);
+    }
+  }, [profile]);
+
   const [isUploading, setIsUploading] = useState(false);
 
   const beforeUpload = async (file: File) => {
@@ -84,7 +104,11 @@ const UploadPage: React.FC = () => {
     setIsUploading(true);
 
     try {
-      const otu = await getOneTimeUpload();
+      if (!auth) {
+        return false;
+      }
+
+      const otu = await getOneTimeUpload(auth);
       if (!otu.success) {
         message.error(otu.errors[0].message);
 
@@ -93,7 +117,7 @@ const UploadPage: React.FC = () => {
 
       await uploadFile(otu.result.uploadURL, file);
 
-      const info = await getVideoInfo(otu.result.uid);
+      const info = await getVideoInfo(otu.result.uid, auth);
       if (!info.success) {
         message.error(info.errors[0].message);
 
@@ -119,12 +143,13 @@ const UploadPage: React.FC = () => {
         resourceId,
       });
 
-      await addVideo(otu.result.uid, accessControlConditions, resourceId);
+      await addVideo(otu.result.uid, accessControlConditions, resourceId, auth);
 
       message.success('the video has been uploaded');
       history.push('/');
     } catch (err) {
-      message.error('cannot upload the video');
+      const msg = getBadRequestMessage(err);
+      message.error(msg || 'cannot upload the video');
       console.error(err);
     } finally {
       setIsUploading(false);
@@ -135,68 +160,92 @@ const UploadPage: React.FC = () => {
 
   return (
     <UploadPageStyle>
-      <PageLayout showConnectWallet={false}>
+      <PageLayout showConnectWallet={true}>
         <div className='header'>
           <Title level={2}>Upload a Video</Title>
+          <p>
+            You can upload up to 5 videos. Please note that there is no delete
+            video feature.
+          </p>
         </div>
-        <Steps
-          current={step}
-          onChange={(value) => {
-            if (value <= step) setStep(value);
-          }}
-          direction='vertical'
-        >
-          <Step
-            disabled={step !== 0}
-            title='Step 1: Choose Access Control Conditions'
-            description={
-              step === 0 && (
-                <div>
-                  <Button
-                    type='primary'
-                    style={{ marginTop: 8 }}
-                    onClick={() => setACLModalVisible(true)}
-                  >
-                    Configure ACL
+
+        {(() => {
+          if (auth === null) {
+            return <Disconnected />;
+          }
+
+          return (
+            <>
+              <Steps
+                current={step}
+                onChange={(value) => {
+                  if (value <= step) setStep(value);
+                }}
+              >
+                <Step
+                  disabled={step !== 0}
+                  title='Choose Access Control Conditions'
+                />
+                <Step disabled={step < 1} title='Upload a video' />
+              </Steps>
+
+              <div className='steps-content'>
+                {(() => {
+                  if (step === 0) {
+                    return (
+                      <div>
+                        <Button
+                          type='primary'
+                          style={{ marginTop: 8 }}
+                          onClick={() => setACLModalVisible(true)}
+                        >
+                          Configure ACL
+                        </Button>
+
+                        {isACLModalVisible && (
+                          <ShareModal
+                            onClose={closeACLSetting}
+                            sharingItems={[]}
+                            onAccessControlConditionsSelected={
+                              setAccessControlConditions
+                            }
+                            getSharingLink={aclSettingComplete}
+                          />
+                        )}
+                      </div>
+                    );
+                  }
+
+                  if (step === 1) {
+                    return (
+                      <Upload
+                        name='avatar'
+                        listType='picture-card'
+                        className='avatar-uploader'
+                        showUploadList={false}
+                        action='https://www.mocky.io/v2/5cc8019d300000980a055e76'
+                        beforeUpload={beforeUpload}
+                      >
+                        <div>
+                          {isUploading ? <LoadingOutlined /> : <PlusOutlined />}
+                          <div style={{ marginTop: 8 }}>Upload</div>
+                        </div>
+                      </Upload>
+                    );
+                  }
+                })()}
+              </div>
+
+              <div className='steps-action'>
+                {step > 0 && (
+                  <Button disabled={isUploading} onClick={back}>
+                    Previous
                   </Button>
-                  {isACLModalVisible && (
-                    <ShareModal
-                      onClose={closeACLSetting}
-                      sharingItems={[{ name: 'test', key: 1 }]}
-                      onAccessControlConditionsSelected={(conditions: any) => {
-                        setAccessControlConditions(conditions);
-                      }}
-                      getSharingLink={aclSettingComplete}
-                    />
-                  )}
-                </div>
-              )
-            }
-          />
-          <Step
-            disabled={step < 1}
-            title='Step 2: Upload a video'
-            description={
-              <div>
-                {step === 1 && (
-                  <Upload
-                    name='avatar'
-                    listType='picture-card'
-                    className='avatar-uploader'
-                    showUploadList={false}
-                    action='https://www.mocky.io/v2/5cc8019d300000980a055e76'
-                    beforeUpload={beforeUpload}
-                  >
-                    <div>
-                      {isUploading ? <LoadingOutlined /> : <PlusOutlined />}
-                      <div style={{ marginTop: 8 }}>Upload</div>
-                    </div>
-                  </Upload>
                 )}
               </div>
-            }
-          />
-        </Steps>
+            </>
+          );
+        })()}
       </PageLayout>
     </UploadPageStyle>
   );
