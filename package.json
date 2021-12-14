@@ -8,7 +8,8 @@
     "test": "craco test",
     "lint-staged": "lint-staged",
     "format": "prettier --write src/**/*.ts{,x}",
-    "lint": "tsc --noEmit && eslint src/**/*.ts{,x}"
+    "lint": "tsc --noEmit && eslint src/**/*.ts{,x}",
+    "deploy:alpha": "npm run build && wrangler publish"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",

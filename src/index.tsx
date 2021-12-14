@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-import { Web3ReactProvider } from '@web3-react/core';
+import { Web3ReactProvider, createWeb3ReactRoot } from '@web3-react/core';
 import { ethers } from 'ethers';
 import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
@@ -17,13 +17,17 @@ export const getLibrary = (provider: any): ethers.providers.Web3Provider => {
   return library;
 };
 
+const Web3ReactProviderReloaded = createWeb3ReactRoot('root');
+
 ReactDOM.render(
   <React.StrictMode>
     <RecoilRoot>
       <Web3ReactProvider getLibrary={getLibrary}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <Web3ReactProviderReloaded getLibrary={getLibrary}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </Web3ReactProviderReloaded>
       </Web3ReactProvider>
     </RecoilRoot>
   </React.StrictMode>,

@@ -28,7 +28,7 @@ const ProviderButton = ({ children, onClick, icon }: any) => (
 );
 
 const ConnectWalletButton = ({ block, style }: any) => {
-  const { account, activate, deactivate } = useWeb3React();
+  const { account, activate, deactivate, active } = useWeb3React('root');
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useRecoilState(profileState);
@@ -56,7 +56,7 @@ const ConnectWalletButton = ({ block, style }: any) => {
 
   useEffect(() => {
     const perform = async () => {
-      if (account) {
+      if (account && account !== profile.walletAddress) {
         const signer = getSigner();
         const message = `I am the owner of ${account}`;
         const signature = await signer.signMessage(message);
