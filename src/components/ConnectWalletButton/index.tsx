@@ -125,13 +125,16 @@ const ConnectWalletButton = ({ block, style }: any) => {
         onCancel={() => setModalVisible(false)}
       >
         <Title level={4}>Connect to wallet</Title>
+
         <ProviderButton icon={'/metamask.svg'} onClick={connect}>
           Metamask
         </ProviderButton>
+
         <ProviderButton icon={'/ud.png'} onClick={loginWithUD}>
           Login with Unstoppable
         </ProviderButton>
       </ModalStyle>
+
       <Button
         type='primary'
         style={style}
@@ -149,6 +152,7 @@ const ConnectWalletButton = ({ block, style }: any) => {
             src='/ud.png'
           />
         )}
+
         {loading
           ? 'Logout...'
           : profile.walletAddress
