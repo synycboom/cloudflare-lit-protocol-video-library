@@ -16,10 +16,10 @@ The API part of this project is https://github.com/synycboom/cloudflare-lit-vide
 - https://cloudflare-lit-video-library.synycboom.workers.dev
 
 ### Cloudflare + Lit Protocol Video Demo
-- TODO
+- https://youtu.be/NtEJ0EUlphg
 
 ### Unstoppabledomains Login Video Demo
-- TODO
+- https://youtu.be/krohZEKXlng
 
 ## To run this project 
 1. Create .env.development file (see .env.example)
