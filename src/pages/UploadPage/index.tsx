@@ -1,10 +1,9 @@
 import Title from 'antd/lib/typography/Title';
 import PageLayout from 'src/components/PageLayout';
 import Button from 'src/components/Button';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useHistory } from 'react-router-dom';
 import Steps from 'antd/lib/steps';
-import { ShareModal } from 'lit-access-control-conditions-modal';
 import { useWeb3React } from '@web3-react/core';
 import UploadPageStyle from './style';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -21,6 +20,8 @@ import { Authentication } from 'src/interfaces/authentication';
 import Disconnected from 'src/components/Disconnected';
 import { getBadRequestMessage } from 'src/helpers/api';
 
+// use lazy component to fix emotion css problem with unstoppabble domain
+const ShareModal = lazy(() => import('src/components/LitAclModal'));
 const { Step } = Steps;
 
 const getChainIdFromAccessControls = (
@@ -203,14 +204,16 @@ const UploadPage: React.FC = () => {
                         </Button>
 
                         {isACLModalVisible && (
-                          <ShareModal
-                            onClose={closeACLSetting}
-                            sharingItems={[]}
-                            onAccessControlConditionsSelected={
-                              setAccessControlConditions
-                            }
-                            getSharingLink={aclSettingComplete}
-                          />
+                          <Suspense fallback={<h1>Still Loading…</h1>}>
+                            <ShareModal
+                              onClose={closeACLSetting}
+                              sharingItems={[]}
+                              onAccessControlConditionsSelected={
+                                setAccessControlConditions
+                              }
+                              getSharingLink={aclSettingComplete}
+                            />
+                          </Suspense>
                         )}
                       </div>
                     );
